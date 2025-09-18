@@ -63,17 +63,51 @@ namespace AgendaMedica.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("AgendaId,PacienteId,MedicoId,DataConsulta,Status")] Agenda agenda)
         {
-            if (ModelState.IsValid)
+            // Verificar se a DataConsulta é >= data atual
+            // Se for retornar com a mensagem de data invalida
+            if (agenda.DataConsulta < DateTime.Now)
             {
-                agenda.AgendaId = Guid.NewGuid();
-                _context.Add(agenda);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                // Adicionar mensagem de erro
+                ModelState.AddModelError("DataConsulta", "A data da consulta deve ser maior ou igual à data atual.");
+                // Recarregar os dados dos dropdowns (SelectList)
+                ViewData["MedicoId"] = new SelectList(_context.Medico, "MedicoId", "Nome", agenda.MedicoId);
+                ViewData["PacienteId"] = new SelectList(_context.Paciente, "PacienteId", "Nome", agenda.PacienteId);
+                // Retornar a view com o modelo atual para exibir o erro
+                return View(agenda);
             }
-            ViewData["MedicoId"] = new SelectList(_context.Medico, "MedicoId", "Nome", agenda.MedicoId);
-            ViewData["PacienteId"] = new SelectList(_context.Paciente, "PacienteId", "Nome", agenda.PacienteId);
-            return View(agenda);
+            // Verificar se o Medico já tem uma consulta agendada na mesma data e hora
+            var medicoAgendado = await _context.Agenda.Where(a => a.MedicoId == agenda.MedicoId && a.DataConsulta == agenda.DataConsulta).FirstOrDefaultAsync();
+
+            if (medicoAgendado != null)
+            {
+                ModelState.AddModelError("MedicoId", "O médico já tem uma consulta agendada na mesma data e hora.");
+            }
+
+            // Verificar se o Paciente já tem uma consulta agendada na mesma data e hora
+            var pacienteAgendado = await _context.Agenda.Where(a => a.PacienteId == agenda.PacienteId && a.DataConsulta == agenda.DataConsulta).FirstOrDefaultAsync();
+            if (pacienteAgendado != null)
+            {
+                ModelState.AddModelError("PacienteId", "O paciente já tem uma consulta agendada na mesma data e hora.");
+            }
+            {
+                if (ModelState.IsValid)
+                {
+                    agenda.AgendaId = Guid.NewGuid();
+                    _context.Add(agenda);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["MedicoId"] = new SelectList(_context.Medico, "MedicoId", "Nome", agenda.MedicoId);
+                ViewData["PacienteId"] = new SelectList(_context.Paciente, "PacienteId", "Nome", agenda.PacienteId);
+                return View(agenda);
+
+                // Verificar se o Médico já tem uma consulta agendada ou na mesma data e hora]
+            }
         }
+
+
+
 
         // GET: Agenda/Edit/5
         public async Task<IActionResult> Edit(Guid? id)

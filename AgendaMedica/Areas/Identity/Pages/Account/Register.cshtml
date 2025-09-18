@@ -1,0 +1,46 @@
+﻿@page
+@model RegisterModel
+@{
+	ViewData["Title"] = "Cadastrar";
+}
+
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+	<div class="col-md-5 col-lg-4">
+		<div class="card shadow-lg border-0 rounded-4">
+			<div class="card-body p-4">
+				<h1 class="text-center mb-3 fw-bold">@ViewData["Title"]</h1>
+				<h5 class="text-center text-muted mb-4">Crie sua nova conta</h5>
+
+				<form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+					<div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+					<div class="form-floating mb-3">
+						<input asp-for="Input.Email" class="form-control rounded-pill" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+						<label asp-for="Input.Email"><i class="bi bi-envelope-fill me-1"></i>Email</label>
+						<span asp-validation-for="Input.Email" class="text-danger"></span>
+					</div>
+
+					<div class="form-floating mb-3">
+						<input asp-for="Input.Password" class="form-control rounded-pill" autocomplete="new-password" aria-required="true" placeholder="password" />
+						<label asp-for="Input.Password"><i class="bi bi-lock-fill me-1"></i>Senha</label>
+						<span asp-validation-for="Input.Password" class="text-danger"></span>
+					</div>
+
+					<div class="form-floating mb-4">
+						<input asp-for="Input.ConfirmPassword" class="form-control rounded-pill" autocomplete="new-password" aria-required="true" placeholder="password" />
+						<label asp-for="Input.ConfirmPassword"><i class="bi bi-lock-fill me-1"></i>Confirmar Senha</label>
+						<span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+					</div>
+
+					<button id="registerSubmit" type="submit" class="btn btn-primary w-100 py-2 rounded-pill shadow-sm">
+						<i class="bi bi-person-plus-fill me-1"></i>Cadastrar
+					</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}
